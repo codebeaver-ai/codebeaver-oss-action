@@ -1,0 +1,118 @@
+name: "CodeBeaver OSS Testing"
+description: "Run AI-powered unit tests and E2E tests for your codebase"
+author: "CodeBeaver Team"
+branding:
+  icon: "check-circle"
+  color: "blue"
+
+inputs:
+  action-type:
+    description: "Type of tests to run (unit, e2e, or both)"
+    required: false
+    default: "both"
+  file-path:
+    description: "Path to the file to analyze for unit tests"
+    required: false
+  config-file:
+    description: "Path to the YAML configuration file"
+    required: false
+    default: "codebeaver.yml"
+  template:
+    description: "Testing framework template to use (e.g., pytest, jest, vitest)"
+    required: false
+  max-files-to-test:
+    description: "Maximum number of files to generate unit tests for"
+    required: false
+    default: "10"
+  verbose:
+    description: "Enable verbose logging output"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+        cache: "pip"
+
+    - name: Install Chrome
+      shell: bash
+      run: |
+        if [ "$(uname)" == "Linux" ]; then
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          echo "CHROME_PATH=/usr/bin/google-chrome" >> $GITHUB_ENV
+        elif [ "$(uname)" == "Darwin" ]; then
+          echo "CHROME_PATH=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" >> $GITHUB_ENV
+        else
+          echo "Unsupported operating system"
+          exit 1
+        fi
+
+    - name: Install CodeBeaver
+      shell: bash
+      run: |
+        pip install codebeaver
+
+    - name: Run CodeBeaver - Both Tests
+      if: inputs.action-type == 'both'
+      shell: bash
+      run: |
+        VERBOSE_FLAG=""
+        if [ "${{ inputs.verbose }}" == "true" ]; then
+          VERBOSE_FLAG="--verbose"
+        fi
+
+        codebeaver $VERBOSE_FLAG --config ${{ inputs.config-file }}
+      env:
+        OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
+        CHROME_INSTANCE_PATH: ${{ env.CHROME_PATH }}
+        STARTING_URL: ${{ env.STARTING_URL }}
+
+    - name: Run CodeBeaver - Unit Tests
+      if: inputs.action-type == 'unit'
+      shell: bash
+      run: |
+        VERBOSE_FLAG=""
+        if [ "${{ inputs.verbose }}" == "true" ]; then
+          VERBOSE_FLAG="--verbose"
+        fi
+
+        TEMPLATE_OPTION=""
+        if [ -n "${{ inputs.template }}" ]; then
+          TEMPLATE_OPTION="--template ${{ inputs.template }}"
+        fi
+
+        FILE_OPTION=""
+        if [ -n "${{ inputs.file-path }}" ]; then
+          FILE_OPTION="--file ${{ inputs.file-path }}"
+        fi
+
+        MAX_FILES_OPTION="--max-files-to-test ${{ inputs.max-files-to-test }}"
+
+        codebeaver unit $VERBOSE_FLAG $TEMPLATE_OPTION $FILE_OPTION $MAX_FILES_OPTION
+      env:
+        OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
+        CHROME_INSTANCE_PATH: ${{ env.CHROME_PATH }}
+
+    - name: Run CodeBeaver - E2E Tests
+      if: inputs.action-type == 'e2e'
+      shell: bash
+      run: |
+        VERBOSE_FLAG=""
+        if [ "${{ inputs.verbose }}" == "true" ]; then
+          VERBOSE_FLAG="--verbose"
+        fi
+
+        CONFIG_OPTION="--config ${{ inputs.config-file }}"
+
+        codebeaver e2e $VERBOSE_FLAG $CONFIG_OPTION
+      env:
+        OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
+        CHROME_INSTANCE_PATH: ${{ env.CHROME_PATH }}
+        STARTING_URL: ${{ env.STARTING_URL }}
