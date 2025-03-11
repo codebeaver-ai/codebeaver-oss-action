@@ -16,7 +16,6 @@ inputs:
   config-file:
     description: "Path to the YAML configuration file"
     required: false
-    default: "codebeaver.yml"
   template:
     description: "Testing framework template to use (e.g., pytest, jest, vitest)"
     required: false
