@@ -73,6 +73,7 @@ runs:
 
     - name: Run CodeBeaver - Both Tests
       if: inputs.action-type == 'both'
+      timeout-minutes: 20
       shell: bash
       run: |
         VERBOSE_FLAG=""
@@ -89,6 +90,7 @@ runs:
 
     - name: Run CodeBeaver - Unit Tests
       if: inputs.action-type == 'unit'
+      timeout-minutes: 5
       shell: bash
       run: |
         VERBOSE_FLAG=""
@@ -117,6 +119,7 @@ runs:
 
     - name: Run CodeBeaver - E2E Tests
       if: inputs.action-type == 'e2e'
+      timeout-minutes: 20
       shell: bash
       run: |
         VERBOSE_FLAG=""
