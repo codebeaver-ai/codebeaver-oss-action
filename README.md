@@ -85,14 +85,16 @@ jobs:
 
 ## Inputs
 
-| Input               | Description                                     | Required | Default          |
-| ------------------- | ----------------------------------------------- | -------- | ---------------- |
-| `action-type`       | Type of tests to run (`unit`, `e2e`, or `both`) | No       | `both`           |
-| `file-path`         | Path to the file to analyze for unit tests      | No       |                  |
-| `config-file`       | Path to the YAML configuration file             | No       | `codebeaver.yml` |
-| `template`          | Testing framework template (e.g., pytest, jest) | No       |                  |
-| `max-files-to-test` | Maximum number of files to test                 | No       | `10`             |
-| `verbose`           | Enable verbose logging output                   | No       | `false`          |
+| Input               | Description                                                                 | Required | Default          |
+| ------------------- | --------------------------------------------------------------------------- | -------- | ---------------- |
+| `action-type`       | Type of tests to run (`unit`, `e2e`, or `both`)                             | No       | `both`           |
+| `file-path`         | Path to the file to analyze for unit tests                                  | No       |                  |
+| `config-file`       | Path to the YAML configuration file                                         | No       | `codebeaver.yml` |
+| `template`          | Testing framework template (e.g., pytest, jest)                             | No       |                  |
+| `max-files-to-test` | Maximum number of files to test                                             | No       | `10`             |
+| `verbose`           | Enable verbose logging output                                               | No       | `false`          |
+| `open-pull-request` | Whether to open a pull request with the changes                             | No       | `true`           |
+| `github-token`      | GitHub token for authentication. If not provided, GITHUB_TOKEN will be used | No       |                  |
 
 ## Environment Variables
 
@@ -134,6 +136,10 @@ Add your OpenAI API key as a secret in your GitHub repository:
 4. Name: `OPENAI_API_KEY`
 5. Value: Your OpenAI API key
 6. Click "Add secret"
+
+### 3. Add your GitHub token
+
+This action uses [peter-evans/create-pull-request](https://github.com/peter-evans/create-pull-request) to create a pull request with the updated Unit Tests. Otherwise, follow [peter's instructions](https://github.com/peter-evans/create-pull-request?tab=readme-ov-file#token) to create a GitHub token and add it as a secret in your repository.
 
 ## Supported Languages and Frameworks
 
