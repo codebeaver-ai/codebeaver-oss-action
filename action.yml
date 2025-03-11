@@ -47,18 +47,29 @@ runs:
           echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
+          # Start Chrome in the background with remote debugging enabled
+          google-chrome --remote-debugging-port=9222 --no-sandbox --headless &
           echo "CHROME_PATH=/usr/bin/google-chrome" >> $GITHUB_ENV
         elif [ "$(uname)" == "Darwin" ]; then
+          # Start Chrome in the background with remote debugging enabled
+          "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222 --headless &
           echo "CHROME_PATH=/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" >> $GITHUB_ENV
         else
           echo "Unsupported operating system"
           exit 1
         fi
+        # Wait for Chrome to start
+        sleep 5
 
     - name: Install CodeBeaver
       shell: bash
       run: |
         pip install codebeaver
+
+    - name: Install playwright
+      shell: bash
+      run: |
+        playwright install
 
     - name: Run CodeBeaver - Both Tests
       if: inputs.action-type == 'both'
