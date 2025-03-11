@@ -10,6 +10,13 @@ inputs:
     description: "Type of tests to run (unit, e2e, or both)"
     required: false
     default: "both"
+  open-pull-request:
+    description: "Whether to open a pull request with the changes"
+    required: false
+    default: "true"
+  github-token:
+    description: "GitHub token for authentication. If not provided, GITHUB_TOKEN will be used"
+    required: false
   file-path:
     description: "Path to the file to analyze for unit tests"
     required: false
@@ -85,7 +92,7 @@ runs:
         OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
         CHROME_INSTANCE_PATH: ${{ env.CHROME_PATH }}
         STARTING_URL: ${{ env.STARTING_URL }}
-        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github-token || env.GITHUB_TOKEN }}
 
     - name: Run CodeBeaver - Unit Tests
       if: inputs.action-type == 'unit'
@@ -113,7 +120,7 @@ runs:
       env:
         OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
         CHROME_INSTANCE_PATH: ${{ env.CHROME_PATH }}
-        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github-token || env.GITHUB_TOKEN }}
 
     - name: Run CodeBeaver - E2E Tests
       if: inputs.action-type == 'e2e'
@@ -138,9 +145,8 @@ runs:
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
-      if: inputs.action-type == 'both' || inputs.action-type == 'e2e'
+      if: inputs.action-type == 'both' || inputs.action-type == 'unit'
       with:
-        token: ${{ env.GITHUB_TOKEN }}
         commit-message: "test: Update tests with CodeBeaver"
         title: "🤖 CodeBeaver: Update Tests"
         body: |
@@ -150,7 +156,7 @@ runs:
           - Generated/updated unit tests
 
           Please review the changes and merge if everything looks good.
-        branch: codebeaver/update-tests
+        branch: ${{ github.head_ref || github.ref_name }}-codebeaver-tests
         base: ${{ github.head_ref || github.ref_name }}
         labels: |
           automated-pr
