@@ -1,9 +1,9 @@
 name: "CodeBeaver OSS Testing"
 description: "Run AI-powered unit tests and E2E tests for your codebase"
-author: "CodeBeaver Team"
+author: "codeBeaver-ai"
 branding:
-  icon: "check-circle"
-  color: "blue"
+  icon: "🦫"
+  color: "orange"
 
 inputs:
   action-type:
@@ -43,6 +43,7 @@ runs:
 
     - name: Install Chrome
       shell: bash
+      if: inputs.action-type == 'e2e' || inputs.action-type == 'both'
       run: |
         if [ "$(uname)" == "Linux" ]; then
           wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
@@ -78,25 +79,6 @@ runs:
         STARTING_URL: ${{ env.STARTING_URL }}
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
-      with:
-        token: ${{ env.GITHUB_TOKEN }}
-        commit-message: "test: Update tests with CodeBeaver"
-        title: "🤖 CodeBeaver: Update Tests"
-        body: |
-          This PR was automatically created by CodeBeaver to update tests.
-
-          ### Changes include:
-          - Generated/updated unit tests
-
-          Please review the changes and merge if everything looks good.
-        branch: codebeaver/update-tests
-        base: ${{ github.head_ref || github.ref_name }}
-        labels: |
-          automated-pr
-          tests
-
     - name: Run CodeBeaver - Unit Tests
       if: inputs.action-type == 'unit'
       shell: bash
@@ -125,25 +107,6 @@ runs:
         CHROME_INSTANCE_PATH: ${{ env.CHROME_PATH }}
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
-      with:
-        token: ${{ env.GITHUB_TOKEN }}
-        commit-message: "test: Update tests with CodeBeaver"
-        title: "🤖 CodeBeaver: Update Tests"
-        body: |
-          This PR was automatically created by CodeBeaver to update tests.
-
-          ### Changes include:
-          - Generated/updated unit tests
-
-          Please review the changes and merge if everything looks good.
-        branch: codebeaver/update-tests
-        base: ${{ github.head_ref || github.ref_name }}
-        labels: |
-          automated-pr
-          tests
-
     - name: Run CodeBeaver - E2E Tests
       if: inputs.action-type == 'e2e'
       shell: bash
@@ -163,4 +126,26 @@ runs:
         OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
         CHROME_INSTANCE_PATH: ${{ env.CHROME_PATH }}
         STARTING_URL: ${{ env.STARTING_URL }}
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      if: inputs.action-type == 'both' || inputs.action-type == 'e2e'
+      with:
+        token: ${{ env.GITHUB_TOKEN }}
+        commit-message: "test: Update tests with CodeBeaver"
+        title: "🤖 CodeBeaver: Update Tests"
+        body: |
+          This PR was automatically created by CodeBeaver to update tests.
+
+          ### Changes include:
+          - Generated/updated unit tests
+
+          Please review the changes and merge if everything looks good.
+        branch: codebeaver/update-tests
+        base: ${{ github.head_ref || github.ref_name }}
+        labels: |
+          automated-pr
+          tests
+      env:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
