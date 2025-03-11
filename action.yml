@@ -70,12 +70,32 @@ runs:
         if [ "${{ inputs.verbose }}" == "true" ]; then
           VERBOSE_FLAG="--verbose"
         fi
+
         codebeaver $VERBOSE_FLAG
       env:
         OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
         CHROME_INSTANCE_PATH: ${{ env.CHROME_PATH }}
         STARTING_URL: ${{ env.STARTING_URL }}
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ env.GITHUB_TOKEN }}
+        commit-message: "test: Update tests with CodeBeaver"
+        title: "🤖 CodeBeaver: Update Tests"
+        body: |
+          This PR was automatically created by CodeBeaver to update tests.
+
+          ### Changes include:
+          - Generated/updated unit tests
+
+          Please review the changes and merge if everything looks good.
+        branch: codebeaver/update-tests
+        base: ${{ github.head_ref || github.ref_name }}
+        labels: |
+          automated-pr
+          tests
 
     - name: Run CodeBeaver - Unit Tests
       if: inputs.action-type == 'unit'
@@ -104,6 +124,25 @@ runs:
         OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
         CHROME_INSTANCE_PATH: ${{ env.CHROME_PATH }}
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ env.GITHUB_TOKEN }}
+        commit-message: "test: Update tests with CodeBeaver"
+        title: "🤖 CodeBeaver: Update Tests"
+        body: |
+          This PR was automatically created by CodeBeaver to update tests.
+
+          ### Changes include:
+          - Generated/updated unit tests
+
+          Please review the changes and merge if everything looks good.
+        branch: codebeaver/update-tests
+        base: ${{ github.head_ref || github.ref_name }}
+        labels: |
+          automated-pr
+          tests
 
     - name: Run CodeBeaver - E2E Tests
       if: inputs.action-type == 'e2e'
