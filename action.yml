@@ -32,6 +32,9 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -67,12 +70,12 @@ runs:
         if [ "${{ inputs.verbose }}" == "true" ]; then
           VERBOSE_FLAG="--verbose"
         fi
-
-        codebeaver $VERBOSE_FLAG --config ${{ inputs.config-file }}
+        codebeaver $VERBOSE_FLAG
       env:
         OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
         CHROME_INSTANCE_PATH: ${{ env.CHROME_PATH }}
         STARTING_URL: ${{ env.STARTING_URL }}
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
     - name: Run CodeBeaver - Unit Tests
       if: inputs.action-type == 'unit'
@@ -83,22 +86,24 @@ runs:
           VERBOSE_FLAG="--verbose"
         fi
 
-        TEMPLATE_OPTION=""
-        if [ -n "${{ inputs.template }}" ]; then
-          TEMPLATE_OPTION="--template ${{ inputs.template }}"
+        CONFIG_OPTION=""
+        if [ -n "${{ inputs.config-file }}" ]; then
+          CONFIG_OPTION="--config ${{ inputs.config-file }}"
         fi
-
+        MAX_FILES_OPTION=""
+        if [ -n "${{ inputs.max-files-to-test }}" ]; then
+          MAX_FILES_OPTION="--max-files-to-test ${{ inputs.max-files-to-test }}"
+        fi
         FILE_OPTION=""
         if [ -n "${{ inputs.file-path }}" ]; then
           FILE_OPTION="--file ${{ inputs.file-path }}"
         fi
 
-        MAX_FILES_OPTION="--max-files-to-test ${{ inputs.max-files-to-test }}"
-
-        codebeaver unit $VERBOSE_FLAG $TEMPLATE_OPTION $FILE_OPTION $MAX_FILES_OPTION
+        codebeaver unit $VERBOSE_FLAG $CONFIG_OPTION $FILE_OPTION $MAX_FILES_OPTION
       env:
         OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
         CHROME_INSTANCE_PATH: ${{ env.CHROME_PATH }}
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
     - name: Run CodeBeaver - E2E Tests
       if: inputs.action-type == 'e2e'
@@ -109,10 +114,14 @@ runs:
           VERBOSE_FLAG="--verbose"
         fi
 
-        CONFIG_OPTION="--config ${{ inputs.config-file }}"
+        CONFIG_OPTION=""
+        if [ -n "${{ inputs.config-file }}" ]; then
+          CONFIG_OPTION="--config ${{ inputs.config-file }}"
+        fi
 
         codebeaver e2e $VERBOSE_FLAG $CONFIG_OPTION
       env:
         OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
         CHROME_INSTANCE_PATH: ${{ env.CHROME_PATH }}
         STARTING_URL: ${{ env.STARTING_URL }}
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
