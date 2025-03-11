@@ -1,6 +1,6 @@
 name: "CodeBeaver OSS Testing"
 description: "Run AI-powered unit tests and E2E tests for your codebase"
-author: "codeBeaver-ai"
+author: "codebeaver-ai"
 branding:
   icon: "🦫"
   color: "orange"
@@ -22,11 +22,9 @@ inputs:
   max-files-to-test:
     description: "Maximum number of files to generate unit tests for"
     required: false
-    default: "10"
   verbose:
     description: "Enable verbose logging output"
     required: false
-    default: "false"
 
 runs:
   using: "composite"
